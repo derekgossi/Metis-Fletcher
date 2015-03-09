@@ -65,3 +65,33 @@ for ele in hmm_title_c:
 srt_title_wrd_cnt = sorted( title_wrd_cnt.items(), key=operator.itemgetter(1), reverse=True )
 print srt_title_wrd_cnt[1:10]
 
+### CHALLENGE #4
+
+from bson.code import Code
+import operator
+
+map = Code(
+	"function () { "   
+    		"var titleSplitted = this.title.split(' ');"
+    		"titleSplitted.forEach(function(z){"
+  		 	"emit(z, 1);"    
+   		"});"
+	"};"
+	)
+
+reduce = Code(
+	"function (key, values) {"
+       	"var total = 0;"
+              "for (var i = 0; i < values.length; i++) {"
+               	"total += values[i];"
+            	"}"
+       "return total;"
+       "};"
+       )
+
+result = hmm.map_reduce(map, reduce, "myresults")
+
+word_dict={}
+for doc in result.find():
+	word_dict[doc["_id"]]=doc["value"]
+print sorted(word_dict.items(), key=operator.itemgetter(1))[-5:]
